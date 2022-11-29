@@ -1,0 +1,15 @@
+name: aoc
+description: An application for solving the Advent of Code 2022 puzzles.
+version: 1.0.0
+# homepage: https://www.example.com
+
+environment:
+  sdk: '>=2.18.5 <3.0.0'
+publish_to: none
+
+# dependencies:
+#   path: ^1.8.0
+
+dev_dependencies:
+  lints: ^2.0.0
+  test: ^1.16.0
