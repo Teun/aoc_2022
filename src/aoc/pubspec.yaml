@@ -13,3 +13,6 @@ publish_to: none
 dev_dependencies:
   lints: ^2.0.0
   test: ^1.16.0
+dependencies:
+  collection: ^1.17.0
+  trotter: ^2.0.0
