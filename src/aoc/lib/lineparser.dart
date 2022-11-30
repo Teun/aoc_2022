@@ -4,6 +4,6 @@ List<T> parseToObjects<T>(String d, RegExp re, ParseCallback<T> trans) {
     return lines.map((line) {
         final match = re.firstMatch(line);
         if(match == null)return null;
-        return trans(match.groups(List.generate(match.groupCount, (index) => index)).cast());
+        return trans(match.groups(List.generate(match.groupCount, (index) => index + 1)).cast());
     }).where((e) => e != null).cast<T>().toList();
 }
