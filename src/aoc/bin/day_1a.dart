@@ -7,10 +7,10 @@ void main(List<String> arguments) async {
     final elves = groupOnSeparator(lines, "");
     final sums = elves.map((e) => e.fold(0, (previousValue, val) => previousValue + val)).toList();
     sums.sort((a, b) => b-a);
-    return sums.first;
+    return sums.first + sums[1] + sums[2];
   });
 
-  await rig.testSnippet("sample", 24000);
+  await rig.testSnippet("sample", 45000);
   await rig.runPrint();
 }
 
