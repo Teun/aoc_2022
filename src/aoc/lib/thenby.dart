@@ -5,6 +5,7 @@ abstract class Sorter<T>{
 }
 class _Sorter<T> implements Sorter<T> {
   final List<_Comparer<T>> _funcs = [];
+  @override
   int call(T first, T second) {
     for (var func in _funcs) {
       final res = func(first, second);
@@ -13,6 +14,7 @@ class _Sorter<T> implements Sorter<T> {
     return 0;
   }
   // Would be nice to have Union types here
+  @override
   Sorter<T> thenBy(Function next,{ Direction dir = Direction.asc}) {
     if(next is _Comparer<T>) {
       _funcs.add(next);
