@@ -1,5 +1,4 @@
 import 'package:aoc/lineparser.dart' as lp;
-import 'package:collection/collection.dart';
 import 'package:test/test.dart';
 
 const String numbers =
@@ -9,7 +8,7 @@ const String numbers =
 56767
 8
 ''';
-const String two_numbers =
+const String twoNumbers =
 '''
 234 88
 456 1
@@ -34,7 +33,7 @@ void main() {
     expect(result.last, 8);
   });
   test('create objects', () {
-    var result = lp.parseToObjects(two_numbers, RegExp(r'(\d+)\s(\d+)'), (s) => Ab(s[0], int.parse(s[1])));
+    var result = lp.parseToObjects(twoNumbers, RegExp(r'(\d+)\s(\d+)'), (s) => Ab(s[0], int.parse(s[1])));
     expect(result.length, 4);
     expect(result.last.a, "8");
     expect(result.last.b, 888);

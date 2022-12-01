@@ -1,12 +1,13 @@
 import 'package:aoc/lineparser.dart';
 import 'package:aoc/rig.dart';
+import 'package:aoc/thenby.dart' as tb;
 
 void main(List<String> arguments) async {
   final rig = Rig(1, (raw) async {
     final lines = getLines(raw);
     final elves = groupOnSeparator(lines, "");
     final sums = elves.map((e) => e.fold(0, (previousValue, val) => previousValue + val)).toList();
-    sums.sort((a, b) => b-a);
+    sums.sort(tb.firstBy((t) => t, dir: tb.Direction.desc));
     return sums.first + sums[1] + sums[2];
   });
 
