@@ -29,7 +29,7 @@ class Rig<T> {
       throw Exception(why(result, expected));
     }
     final out = (result is String) ? result : result.toString();
-    print("OK: $out");
+    print("✅ $out");
     return result;
   }
   Future<T> testSnippet(String name, T expected) async {
