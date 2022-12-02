@@ -7,7 +7,7 @@ void main(List<String> arguments) async {
     final lines = getLines(raw);
     final elves = groupOnSeparator(lines, "");
     final sums = elves.map((e) => e.fold(0, (previousValue, val) => previousValue + val)).toList();
-    sums.sort(tb.firstBy((t) => t, dir: tb.Direction.desc));
+    sums.sort(tb.firstBy<int, int>((t) => t, dir: tb.Direction.desc));
     return sums.first + sums[1] + sums[2];
   });
 
