@@ -28,8 +28,7 @@ Move moveNeeded(Move elf, Result res) {
   if(res == Result.draw) return elf;
   if(elf == Move.rock) return res == Result.win ? Move.paper : Move.scissors;
   if(elf == Move.paper) return res == Result.win ? Move.scissors : Move.rock;
-  if(elf == Move.scissors) return res == Result.win ? Move.rock : Move.paper;
-  throw Exception("huh");
+  return res == Result.win ? Move.rock : Move.paper;
 }
 enum Move{rock, paper, scissors}
 enum Result{win, draw, loss}
@@ -39,10 +38,7 @@ int valueOfMove(Move mine, Move theirs) {
 }
 int score(Move mine, Move theirs) {
   if(mine == theirs)return 3;
-  if(mine == Move.rock) return theirs == Move.scissors ? 6 : 0;
-  if(mine == Move.paper) return theirs == Move.rock ? 6 : 0;
-  if(mine == Move.scissors) return theirs == Move.paper ? 6 : 0;
-  throw Exception("Unexpected value");
-
+  if((mine.index - theirs.index) % 3 == 2) return 6;
+  return 0;
 }
 
