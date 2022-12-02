@@ -1,2 +1,1 @@
-A sample command-line application with an entrypoint in `bin/`, library code
-in `lib/`, and example unit test in `test/`.
+Doing the Advent of Code puzzles in Dart this year. Every puzzle (of the 50) wis a separate command line app in bin/. Anything reusable across days will be in lib/ and will have unit tests  in `test/`.
