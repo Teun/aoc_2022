@@ -2,19 +2,21 @@ import 'package:aoc/lineparser.dart';
 import 'package:aoc/rig.dart';
 
 class Bag {
-  String first;
-  String second;
-  Bag(this.first, this.second);
+  late Set<String> first;
+  late Set<String> second;
+  Bag(String full){
+    var len = (full.length~/2);
+    first = Set.from(full.substring(0, len).split(''));
+    second = Set.from(full.substring(len).split(''));
+  }
 }
 void main(List<String> arguments) async {
   final rig = Rig(3, (raw) async {
     var items = parseToObjects(raw, RegExp(r'(\w+)'), (matches) {
-      var len = (matches[0].length~/2);
-      return Bag(matches[0].substring(0, len), matches[0].substring(len));
+      return Bag(matches[0]);
     });
     var scores = items.map((bag) {
-      var charsinFirst = bag.first.split('');
-      var duplicate = charsinFirst.firstWhere((c) => bag.second.contains(c));
+      var duplicate = bag.first.intersection(bag.second).first;
       return scoreFor(duplicate);
     });
     return scores.fold(0, (acc, val) => acc + val);

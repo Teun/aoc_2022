@@ -2,24 +2,26 @@ import 'package:aoc/lineparser.dart';
 import 'package:aoc/rig.dart';
 
 class Bag {
-  String first;
-  String second;
-  String get all => first + second;
-  Bag(this.first, this.second);
-  bool contains(String item) {
-    return first.contains(item) || second.contains(item);
+  late Set<String> first;
+  late Set<String> second;
+  Set<String> get all => first.union(second);
+  Bag(String full){
+    var len = (full.length~/2);
+    first = Set.from(full.substring(0, len).split(''));
+    second = Set.from(full.substring(len).split(''));
   }
 }
 void main(List<String> arguments) async {
   final rig = Rig(3, (raw) async {
     var items = parseToObjects(raw, RegExp(r'(\w+)'), (matches) {
-      var len = (matches[0].length~/2);
-      return Bag(matches[0].substring(0, len), matches[0].substring(len));
+      return Bag(matches[0]);
     });
     var sum = 0;
     for (var i = 0; i < items.length; i = i + 3) {
-      var charsInFirst = items[i].all.split('');
-      var common = charsInFirst.firstWhere((c) => items[i+1].contains(c) && items[i+2].contains(c));
+      var common = items[i].all
+        .intersection(items[i+1].all)
+        .intersection(items[i+2].all)
+        .first;
       sum += scoreFor(common);
     }
     return sum;
