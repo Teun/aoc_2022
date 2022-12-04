@@ -15,4 +15,5 @@ dev_dependencies:
   test: ^1.16.0
 dependencies:
   collection: ^1.17.0
+  stubble: ^1.1.0
   trotter: ^2.0.0
