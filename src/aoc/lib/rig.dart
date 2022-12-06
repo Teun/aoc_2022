@@ -23,16 +23,17 @@ class Rig<T> {
     print("Result: \n$out");
   }
 
-  Future<T> test(String raw, T expected) async {
+  Future<bool> test(String raw, T expected) async {
     final result = await _func(raw);
     if (!isEqual(result, expected)) {
-      throw Exception(why(result, expected));
+      print("⛔️ ${why(result, expected)}");
+      return false;
     }
     final out = (result is String) ? result : result.toString();
     print("✅ $out");
-    return result;
+    return true;
   }
-  Future<T> testSnippet(String name, T expected) async {
+  Future<bool> testSnippet(String name, T expected) async {
         final all = await _getFileContent("$_day.snips");
         final snip = extractSnip(name, all);
         return await test(snip, expected);

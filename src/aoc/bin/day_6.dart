@@ -14,9 +14,9 @@ void main(List<String> arguments) async {
     return pos + 1;
   });
 
-  await rig.test("bvwbjplbgvbhsrlpgdmjqwftvncz", 5);
-  await rig.test("nppdvjthqldpwncqszvftbrmjlhg", 6);
-  await rig.test("nznrnfrfntjfmvfwmzdfjlvtqnbhcprsg", 10);
-  await rig.test("zcfzfwzzqfrljwzlrfnpqdbhtmscgvjw", 11);
-  await rig.runPrint();
+  var allOK = await rig.test("bvwbjplbgvbhsrlpgdmjqwftvncz", 5);
+  allOK &= await rig.test("nppdvjthqldpwncqszvftbrmjlhg", 6);
+  allOK &= await rig.test("nznrnfrfntjfmvfwmzdfjlvtqnbhcprsg", 10);
+  allOK &= await rig.test("zcfzfwzzqfrljwzlrfnpqdbhtmscgvjw", 11);
+  if(allOK) await rig.runPrint();
 }
