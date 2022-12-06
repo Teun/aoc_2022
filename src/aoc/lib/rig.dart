@@ -23,14 +23,23 @@ class Rig<T> {
     print("Result: \n$out");
   }
 
+  var testsRun = 0;
+
   Future<bool> test(String raw, T expected) async {
-    final result = await _func(raw);
+    testsRun++;
+    final T result;
+    try{
+      result = await _func(raw);
+    }catch(e) {
+      print("Test $testsRun: ⛔️ Exception: ${e.toString()}");
+      return false;
+    }
     if (!isEqual(result, expected)) {
-      print("⛔️ ${why(result, expected)}");
+      print("Test $testsRun: ⛔️ ${why(result, expected)}");
       return false;
     }
     final out = (result is String) ? result : result.toString();
-    print("✅ $out");
+    print("Test $testsRun: ✅ $out");
     return true;
   }
   Future<bool> testSnippet(String name, T expected) async {
