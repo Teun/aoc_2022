@@ -20,6 +20,21 @@ extension CombineDirection on Coord {
     return Coord(x - 1, y);
   }
 }
-class Space<TLoc, TVal> {
-  Map<TLoc, TVal> places = {};
+class Space<TVal> {
+  Map<Coord, TVal> _places = {};
+  TVal? at(Coord loc){
+    return _places[loc];
+  }
+  Space.fromEntries(List<MapEntry<Coord, TVal>> entries){
+    _places = Map.fromEntries(entries);
+  }
+  Space.fromText(String rawMap, TVal? Function(String) valSelect){
+    var chars = rawMap.split('\n').map((l) => l.split('')).toList();
+    for (var y = 0; y < chars.length; y++) {
+      for (var x = 0; x < chars[0].length; x++) {
+        var val = valSelect(chars[y][x]);
+        if(val != null) _places[Coord(x, y)] = val;
+      }
+    }
+  }
 }
