@@ -1,5 +1,6 @@
 import 'package:aoc/lineparser.dart';
 import 'package:aoc/rig.dart';
+import 'package:aoc/thenby.dart';
 
 abstract class FS {
   Dir? parent;
@@ -55,11 +56,13 @@ void main(List<String> arguments) async {
       }
     }
 
-    var sizes = root.recursiveDirs().map((e) => e.size());
-    return sizes.where((s) => s <= 100000)
-      .fold(0, (acc, s) => acc + s);
+    var sizes = root.recursiveDirs().map((e) => e.size()).toList();
+    var available = 70000000 - root.size();
+    var needed = 30000000 - available;
+    sizes.sort(firstBy((int i) => i));
+    return sizes.firstWhere((s) => s >= needed);
   });
 
-  var allOK = await rig.testSnippet("sample", 95437);
+  var allOK = await rig.testSnippet("sample", 24933642);
   if(allOK) await rig.runPrint();
 }
