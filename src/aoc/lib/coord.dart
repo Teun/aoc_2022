@@ -84,4 +84,20 @@ class Space<TVal> {
       _bound.expandToContain(place);
     }
   }
+
+  String visualize(String Function(TVal val) showAs) {
+    var result = "";
+    for (var y = bounds.topLeft.y; y <= bounds.bottomRight.y; y++) {
+      for (var x = bounds.topLeft.x; x <= bounds.bottomRight.x; x++) {
+        var val = at(Coord(x, y));
+        if (val == null) {
+          result += " ";
+        } else {
+          result += showAs(val)[0];
+        }
+      }
+      result += "\n";
+    }
+    return result;
+  }
 }

@@ -18,6 +18,7 @@ void main(List<String> arguments) async {
           (index) => grid.at(Coord(grid.bounds.topLeft.x + index, y)));
       markVisibility(row);
     }
+    print(grid.visualize((tree) => tree.visible ? '#' : '?'));
     return grid.all.where((pair) => pair.value.visible).length;
   });
 
