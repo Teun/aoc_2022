@@ -58,6 +58,7 @@ class Space<TVal> {
     } else {
       _places[loc] = val;
     }
+    _checkAll();
   }
 
   Space.fromEntries(List<MapEntry<Coord, TVal>> entries) {
