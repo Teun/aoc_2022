@@ -1,3 +1,7 @@
+abstract class Costed {
+  abstract num cost;
+}
+
 class StepTo<TPos, TStep> {
   TPos pos;
   TStep? step;

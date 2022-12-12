@@ -23,6 +23,7 @@ void main(List<String> arguments) async {
     });
 
     cpu.run();
+    // ignore: prefer_interpolation_to_compose_strings
     return '\n' + space.visualize((val) => val);
   });
 

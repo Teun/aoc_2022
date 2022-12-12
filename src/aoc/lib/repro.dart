@@ -5,6 +5,7 @@ noop
 addx 4
 '''
       .split("\n");
+  // ignore: unused_local_variable
   List<Cmd> commands = lines.map((l) => cmdFromWords(l.split(' '))).toList();
 }
 
