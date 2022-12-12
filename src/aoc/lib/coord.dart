@@ -65,7 +65,7 @@ class Space<TVal> {
     _places = Map.fromEntries(entries);
     _checkAll();
   }
-  Space.fromText(String rawMap, TVal? Function(String) valSelect) {
+  Space.fromText(String rawMap, TVal? Function(String, Coord pos) valSelect) {
     var chars = rawMap
         .split('\n')
         .where((l) => l.isNotEmpty)
@@ -73,7 +73,7 @@ class Space<TVal> {
         .toList();
     for (var y = 0; y < chars.length; y++) {
       for (var x = 0; x < chars[0].length; x++) {
-        var val = valSelect(chars[y][x]);
+        var val = valSelect(chars[y][x], Coord(x, y));
         if (val != null) _places[Coord(x, y)] = val;
       }
     }

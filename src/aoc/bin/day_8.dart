@@ -3,7 +3,7 @@ import 'package:aoc/coord.dart';
 
 void main(List<String> arguments) async {
   final rig = Rig(8, (raw) async {
-    var grid = Space.fromText(raw, (d) {
+    var grid = Space.fromText(raw, (d, c) {
       return Tree(int.parse(d));
     });
     for (var x = grid.bounds.topLeft.x; x <= grid.bounds.bottomRight.x; x++) {

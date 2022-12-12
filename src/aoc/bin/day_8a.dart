@@ -4,7 +4,7 @@ import 'package:aoc/thenby.dart' as tb;
 
 void main(List<String> arguments) async {
   final rig = Rig(8, (raw) async {
-    var grid = Space.fromText(raw, (d) {
+    var grid = Space.fromText(raw, (d, p) {
       return Tree(int.parse(d));
     });
     var scores = grid.all.map((p) {
