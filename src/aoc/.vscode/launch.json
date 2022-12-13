@@ -8,7 +8,7 @@
             "name": "Dart & Flutter",
             "request": "launch",
             "type": "dart",
-            "program": "bin/day_13.dart"
+            "program": "bin/day_13a.dart"
         }
     ]
 }
