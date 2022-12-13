@@ -17,8 +17,8 @@ final Map<String, List<Edge>> graph = {
 
 void main() {
   test('breadth first finds', () async {
-    var finder = pf.Pathfinder<String, String>();
-    var path = finder.breadthFirst(
+    var finder = pf.Pathfinder();
+    var path = finder.breadthFirst<String, String>(
         (from) => graph[from]!.map((e) => pf.StepTo(e.to, e.to)).toList(),
         (to) => to == "e",
         "a");

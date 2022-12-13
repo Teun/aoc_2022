@@ -18,8 +18,8 @@ void main(List<String> arguments) async {
       }
       return v.codeUnitAt(0) - "a".codeUnitAt(0) + 1;
     });
-    var finder = Pathfinder<Coord, Direction>();
-    var path = finder.breadthFirst((from) {
+    var finder = Pathfinder();
+    var path = finder.breadthFirst<Coord, Direction>((from) {
       var neighbours = [
         Direction.north,
         Direction.south,

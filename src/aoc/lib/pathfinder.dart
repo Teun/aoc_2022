@@ -1,27 +1,36 @@
+import 'package:aoc/thenby.dart';
+import 'package:collection/collection.dart';
+
 abstract class Costed {
-  abstract num cost;
+  abstract double cost;
 }
 
 class StepTo<TPos, TStep> {
   TPos pos;
   TStep? step;
-  StepTo(this.pos, this.step);
+  late double cost;
+  StepTo(this.pos, this.step, {double cost = 1.0}) {
+    if (step == null) cost = 0;
+  }
 }
 
 class PathTo<TPos, TStep> {
   Iterable<StepTo<TPos, TStep>> steps;
   PathTo(this.steps);
+  double get cost {
+    return steps.fold(0.0, (acc, s) => acc + s.cost);
+  }
 }
 
 typedef ExploreFunc<TPos, TStep> = List<StepTo<TPos, TStep>> Function(
     TPos from);
 typedef TargetFunc<TPos> = bool Function(TPos pos);
 
-class Pathfinder<TPos, TStep> {
-  List<PathTo<TPos, TStep>> toExplore = [];
-  Map<TPos, PathTo<TPos, TStep>> pathsTo = {};
-  PathTo<TPos, TStep> breadthFirst(
+class Pathfinder {
+  PathTo<TPos, TStep> breadthFirst<TPos, TStep>(
       ExploreFunc<TPos, TStep> explore, TargetFunc<TPos> target, TPos start) {
+    List<PathTo<TPos, TStep>> toExplore = [];
+    Map<TPos, PathTo<TPos, TStep>> pathsTo = {};
     toExplore = [
       PathTo([StepTo(start, null)])
     ];
@@ -42,5 +51,20 @@ class Pathfinder<TPos, TStep> {
       }
       if (toExplore.isEmpty) throw Exception("No path found");
     }
+  }
+
+  PathTo<TPos, TStep> findShortest<TPos, TStep extends Costed>(
+      ExploreFunc<TPos, TStep> explore, TargetFunc<TPos> target, TPos start) {
+    var toExplore = PriorityQueue(firstBy((PathTo<TPos, TStep> v) => v.steps
+        .where((s) => s.step != null)
+        .fold(0.0, (acc, v) => acc + v.step!.cost)));
+    Map<TPos, PathTo<TPos, TStep>> pathsTo = {};
+    toExplore.add(PathTo([StepTo(start, null)]));
+    pathsTo = {};
+    pathsTo[start] = toExplore.first;
+    do {
+      // implement
+      return pathsTo[start]!;
+    } while (toExplore.isNotEmpty);
   }
 }
