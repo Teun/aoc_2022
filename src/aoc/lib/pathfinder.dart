@@ -1,4 +1,3 @@
-import 'package:aoc/thenby.dart';
 import 'package:collection/collection.dart';
 
 abstract class Costed {
@@ -17,7 +16,7 @@ class PathTo<TPos, TStep> extends Comparable {
   PathTo(this.steps);
   double? _cost;
   double get cost {
-    _cost ??= steps.fold(0.0, (acc, s) => acc + s.cost);
+    _cost ??= steps.fold<double>(0.0, (acc, s) => acc + s.cost);
     return _cost!;
   }
 

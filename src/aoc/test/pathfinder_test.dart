@@ -1,3 +1,4 @@
+import 'package:aoc/coord.dart';
 import 'package:aoc/pathfinder.dart' as pf;
 import 'package:test/test.dart';
 
@@ -30,7 +31,7 @@ void main() {
     expect(path.cost, 2);
     expect(path.steps.toList()[1].pos, 'd');
   });
-  test('shortest finds', () async {
+  test('shortest finds in directed graph', () async {
     var finder = pf.Pathfinder();
     var path = finder.findShortest<String, String>(
         (from) => graph[from]!
@@ -43,4 +44,57 @@ void main() {
     expect(steps.length, 4);
     expect(steps[1].pos, 'b');
   });
+  test('shortest Dijkstra in carthesian space', () async {
+    var space = Space<String>.fromText('''
+...x.....
+.........
+..xxx....
+.....x...
+.xx.xxx..
+..x.x....
+''', (x, c) => x);
+    var start = Coord(4, 0);
+    var end = Coord(3, 5);
+    var finder = pf.Pathfinder();
+    var path = finder.findShortest<Coord, Direction>((from) {
+      space.set(from, 'o');
+      return Direction.values
+          .map((d) => pf.StepTo(from.toDirection(d), d))
+          .where((s) => space.at(s.pos) == null || space.at(s.pos) != "x")
+          .toList();
+    }, (to) => to == end, start);
+    expect(path.cost, 10);
+    visPathInSpace(path, space);
+  });
+  test('shortest A* in carthesian space', () async {
+    var space = Space<String>.fromText('''
+...x.....
+.........
+..xxx....
+.....x...
+.xx.xxx..
+..x.x....
+''', (x, c) => x);
+    var start = Coord(4, 0);
+    var end = Coord(3, 5);
+    var finder = pf.Pathfinder();
+    var path = finder.findShortest<Coord, Direction>((from) {
+      space.set(from, 'o');
+      return Direction.values
+          .map((d) => pf.StepTo(from.toDirection(d), d))
+          .where((s) => space.at(s.pos) == null || space.at(s.pos) != "x")
+          .toList();
+    }, (to) => to == end, start,
+        minimalDistanceRemaining: (from) =>
+            ((from.x - end.x).abs() + (from.y - end.y).abs()).toDouble());
+    expect(path.cost, 10);
+    visPathInSpace(path, space);
+  });
+}
+
+void visPathInSpace(pf.PathTo<Coord, Direction> path, Space<String> space) {
+  for (var s in path.steps) {
+    space.set(s.pos, '+');
+  }
+  print(space.visualize((val) => val[0]));
 }
