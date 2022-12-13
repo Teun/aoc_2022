@@ -14,6 +14,10 @@ final Map<String, List<Edge>> graph = {
   'd': [Edge('e', 3)],
   'e': []
 };
+/* /5-b-3-c-1\
+  a          e
+   \-7--d-3--|
+*/
 
 void main() {
   test('breadth first finds', () async {
@@ -23,6 +27,20 @@ void main() {
         (to) => to == "e",
         "a");
     expect(path.steps.length, 3);
+    expect(path.cost, 2);
     expect(path.steps.toList()[1].pos, 'd');
+  });
+  test('shortest finds', () async {
+    var finder = pf.Pathfinder();
+    var path = finder.findShortest<String, String>(
+        (from) => graph[from]!
+            .map((e) => pf.StepTo(e.to, e.to, cost: e.weight.toDouble()))
+            .toList(),
+        (to) => to == "e",
+        "a");
+    expect(path.cost, 9);
+    var steps = path.steps.toList();
+    expect(steps.length, 4);
+    expect(steps[1].pos, 'b');
   });
 }

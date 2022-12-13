@@ -8,17 +8,28 @@ abstract class Costed {
 class StepTo<TPos, TStep> {
   TPos pos;
   TStep? step;
-  late double cost;
-  StepTo(this.pos, this.step, {double cost = 1.0}) {
-    if (step == null) cost = 0;
-  }
+  double cost;
+  StepTo(this.pos, this.step, {this.cost = 1.0});
 }
 
-class PathTo<TPos, TStep> {
+class PathTo<TPos, TStep> extends Comparable {
   Iterable<StepTo<TPos, TStep>> steps;
   PathTo(this.steps);
+  double? _cost;
   double get cost {
-    return steps.fold(0.0, (acc, s) => acc + s.cost);
+    _cost ??= steps.fold(0.0, (acc, s) => acc + s.cost);
+    return _cost!;
+  }
+
+  TPos? _to;
+  TPos get to {
+    _to ??= steps.last.pos;
+    return _to!;
+  }
+
+  @override
+  int compareTo(other) {
+    return cost.compareTo(other.cost);
   }
 }
 
@@ -32,17 +43,17 @@ class Pathfinder {
     List<PathTo<TPos, TStep>> toExplore = [];
     Map<TPos, PathTo<TPos, TStep>> pathsTo = {};
     toExplore = [
-      PathTo([StepTo(start, null)])
+      PathTo([StepTo(start, null, cost: 0.0)])
     ];
     pathsTo = {};
     pathsTo[start] = toExplore.first;
     while (true) {
       var exploringFrom = toExplore.removeAt(0);
-      var nextLocations = explore(exploringFrom.steps.last.pos);
+      var nextLocations = explore(exploringFrom.to);
       for (var next in nextLocations) {
         if (!pathsTo.containsKey(next.pos)) {
           var newPath = PathTo(exploringFrom.steps.followedBy([next]));
-          if (target(newPath.steps.last.pos)) {
+          if (target(newPath.to)) {
             return newPath;
           }
           pathsTo[next.pos] = newPath;
@@ -53,18 +64,45 @@ class Pathfinder {
     }
   }
 
-  PathTo<TPos, TStep> findShortest<TPos, TStep extends Costed>(
-      ExploreFunc<TPos, TStep> explore, TargetFunc<TPos> target, TPos start) {
-    var toExplore = PriorityQueue(firstBy((PathTo<TPos, TStep> v) => v.steps
-        .where((s) => s.step != null)
-        .fold(0.0, (acc, v) => acc + v.step!.cost)));
+  PathTo<TPos, TStep> findShortest<TPos, TStep>(
+      ExploreFunc<TPos, TStep> explore, TargetFunc<TPos> target, TPos start,
+      {double Function(TPos from)? minimalDistanceRemaining}) {
+    var heuristicFunc = minimalDistanceRemaining ?? (p) => 0;
+    var toExplore = PriorityQueue<PathTo<TPos, TStep>>(((p0, p1) =>
+        (p0.cost + heuristicFunc(p0.to))
+            .compareTo(p1.cost + heuristicFunc(p1.to))));
     Map<TPos, PathTo<TPos, TStep>> pathsTo = {};
-    toExplore.add(PathTo([StepTo(start, null)]));
+    PathTo<TPos, TStep>? bestPath;
+    toExplore.add(PathTo([StepTo(start, null, cost: 0.0)]));
     pathsTo = {};
     pathsTo[start] = toExplore.first;
     do {
-      // implement
-      return pathsTo[start]!;
+      var exploringFrom = toExplore.removeFirst();
+      if (bestPath != null &&
+          exploringFrom.cost + heuristicFunc(exploringFrom.to) >
+              bestPath.cost) {
+        break;
+      }
+      var nextLocations = explore(exploringFrom.to);
+      for (var next in nextLocations) {
+        var newPath = PathTo(exploringFrom.steps.followedBy([next]));
+        if (!pathsTo.containsKey(next.pos)) {
+          pathsTo[next.pos] = newPath;
+          toExplore.add(newPath);
+        } else {
+          // we already have a path, but this one may be shorter
+          if (pathsTo[next.pos]!.cost > newPath.cost) {
+            pathsTo[next.pos] = newPath;
+          }
+        }
+        if (target(newPath.to)) {
+          if (bestPath == null || bestPath.cost > newPath.cost) {
+            bestPath = newPath;
+          }
+        }
+      }
     } while (toExplore.isNotEmpty);
+    if (bestPath == null) throw Exception("No path found");
+    return bestPath;
   }
 }
