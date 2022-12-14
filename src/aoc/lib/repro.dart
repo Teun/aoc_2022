@@ -15,11 +15,11 @@ abstract class Cmd {
   Cmd({this.duration = 1});
 }
 
-var cmdFromWords = (List<String> words) {
+Cmd cmdFromWords(List<String> words) {
   if (words[0] == "noop") return Noop();
   if (words[0] == "addx") return AddX(int.parse(words[1]));
   throw Exception("Unknown mnemonic: ${words[0]}");
-};
+}
 
 class AddX extends Cmd {
   int delta;

@@ -17,8 +17,15 @@ class Coord {
 class Rect {
   Coord topLeft = Coord(0, 0);
   Coord bottomRight = Coord(0, 0);
+  bool uninitialized = true;
 
   void expandToContain(Coord place) {
+    if (uninitialized) {
+      topLeft = place;
+      bottomRight = place;
+      uninitialized = false;
+      return;
+    }
     if (place.x < topLeft.x || place.y < topLeft.y) {
       topLeft =
           Coord(math.min(place.x, topLeft.x), math.min(place.y, topLeft.y));
