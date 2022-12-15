@@ -2,7 +2,7 @@ import 'package:aoc/rig.dart';
 import 'package:aoc/coord.dart';
 
 void main(List<String> arguments) async {
-  final rig = Rig(8, (raw) async {
+  final rig = Rig(8, (raw, {dynamic extra}) async {
     var grid = Space.fromText(raw, (d, c) {
       return Tree(int.parse(d));
     });

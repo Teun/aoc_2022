@@ -36,7 +36,7 @@ class Dir extends FS {
 }
 
 void main(List<String> arguments) async {
-  final rig = Rig(7, (raw) async {
+  final rig = Rig(7, (raw, {dynamic extra}) async {
     var items = parseToObjects(
         raw, RegExp(r'(\$ ls|\$ cd ([\w.\/]+)|(dir|\d+) ([\w.\/]+))'),
         (matches) {

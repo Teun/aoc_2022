@@ -22,7 +22,7 @@ class Rope {
 }
 
 void main(List<String> arguments) async {
-  final rig = Rig(9, (raw) async {
+  final rig = Rig(9, (raw, {dynamic extra}) async {
     var items = parseToObjects(raw, RegExp(r'(\w) (\d+)'), (matches) {
       return matches;
     });

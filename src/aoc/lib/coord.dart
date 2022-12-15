@@ -12,6 +12,9 @@ class Coord {
 
   @override
   int get hashCode => x.hashCode ^ y.hashCode;
+  int manhattan(Coord from) {
+    return (x - from.x).abs() + (y - from.y).abs();
+  }
 }
 
 class Rect {
@@ -35,6 +38,12 @@ class Rect {
           math.max(place.x, bottomRight.x), math.max(place.y, bottomRight.y));
     }
   }
+
+  Rect.empty();
+  Rect(Coord topLeft, Coord bottomRight) {
+    expandToContain(topLeft);
+    expandToContain(bottomRight);
+  }
 }
 
 enum Direction { north, south, east, west }
@@ -50,7 +59,7 @@ extension CombineDirection on Coord {
 
 class Space<TVal> {
   Map<Coord, TVal> _places = {};
-  final Rect _bound = Rect();
+  final Rect _bound = Rect.empty();
   TVal? at(Coord loc) {
     return _places[loc];
   }

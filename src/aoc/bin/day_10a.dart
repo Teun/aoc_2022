@@ -4,7 +4,7 @@ import 'package:aoc/rig.dart';
 import 'package:aoc/cpu.dart';
 
 void main(List<String> arguments) async {
-  final rig = Rig(10, (raw) async {
+  final rig = Rig(10, (raw, {dynamic extra}) async {
     List<Cmd> items = parseToObjects(raw, RegExp(r'(.*)'), (matches) {
       var words = matches[0].split(' ');
       return cmdFromWords(words);

@@ -2,7 +2,7 @@ import 'package:aoc/lineparser.dart';
 import 'package:aoc/rig.dart';
 
 void main(List<String> arguments) async {
-  final rig = Rig(13, (raw) async {
+  final rig = Rig(13, (raw, {dynamic extra}) async {
     var items =
         parseToObjects(raw, RegExp(r'(.*)\n(.*)', multiLine: false), (matches) {
       return matches.map((e) => parseNumberList(e)).toList();

@@ -3,7 +3,7 @@ import 'package:aoc/pathfinder.dart';
 import 'package:aoc/rig.dart';
 
 void main(List<String> arguments) async {
-  final rig = Rig(12, (raw) async {
+  final rig = Rig(12, (raw, {dynamic extra}) async {
     Coord start = Coord(0, 0);
 
     var space = Space.fromText(raw, (v, p) {

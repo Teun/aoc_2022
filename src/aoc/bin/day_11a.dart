@@ -3,7 +3,7 @@ import 'package:aoc/rig.dart';
 import 'package:aoc/thenby.dart';
 
 void main(List<String> arguments) async {
-  final rig = Rig(11, (raw) async {
+  final rig = Rig(11, (raw, {dynamic extra}) async {
     var monkeys = parseToObjects(
         raw,
         RegExp(

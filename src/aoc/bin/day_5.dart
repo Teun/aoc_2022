@@ -2,12 +2,13 @@ import 'package:aoc/lineparser.dart';
 import 'package:aoc/rig.dart';
 
 void main(List<String> arguments) async {
-  final rig = Rig(5, (raw) async {
+  final rig = Rig(5, (raw, {dynamic extra}) async {
     var rawStacks = raw.split("\n\n")[0];
     var rawSteps = raw.split("\n\n")[1];
 
     var stacks = readStacksFrom(rawStacks);
-    var items = parseToObjects(rawSteps, RegExp(r'move (\d+) from (\d+) to (\d+)'), (matches) {
+    var items = parseToObjects(
+        rawSteps, RegExp(r'move (\d+) from (\d+) to (\d+)'), (matches) {
       return matches.map(int.parse).toList();
     });
     for (var action in items) {
@@ -32,11 +33,12 @@ Map<int, List<String>> readStacksFrom(String rawStacks) {
     acc[int.parse(letter)] = v.start;
     return acc;
   });
-  var result = Map.fromEntries(cols.entries.map((e) => MapEntry<int, List<String>>(e.key, [])));
-  for (var i = lines.length-2; i >= 0; i--) {
+  var result = Map.fromEntries(
+      cols.entries.map((e) => MapEntry<int, List<String>>(e.key, [])));
+  for (var i = lines.length - 2; i >= 0; i--) {
     for (var col in result.entries) {
       var letter = lines[i].substring(cols[col.key]!, cols[col.key]! + 1);
-      if(letter.trim().isNotEmpty){
+      if (letter.trim().isNotEmpty) {
         result[col.key]!.add(letter);
       }
     }

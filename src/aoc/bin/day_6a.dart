@@ -1,11 +1,11 @@
 import 'package:aoc/rig.dart';
 
 void main(List<String> arguments) async {
-  final rig = Rig(6, (raw) async {
+  final rig = Rig(6, (raw, {dynamic extra}) async {
     var chars = raw.split('');
     var indexes = List.generate(chars.length, (index) => index);
     var pos = indexes.firstWhere((i) {
-      var s = Set.from(chars.getRange( (i-13).clamp(0, 1e6).toInt(), i+1));
+      var s = Set.from(chars.getRange((i - 13).clamp(0, 1e6).toInt(), i + 1));
       return s.length == 14;
     });
 

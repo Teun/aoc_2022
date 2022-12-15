@@ -1,7 +1,7 @@
 import 'package:aoc/rig.dart';
 
 void main(List<String> arguments) async {
-  final rig = Rig(6, (raw) async {
+  final rig = Rig(6, (raw, {dynamic extra}) async {
     var chars = raw.split('');
     var indexes = List.generate(chars.length, (index) => index);
     var pos = indexes.firstWhere((i) {
