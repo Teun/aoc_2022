@@ -18,12 +18,14 @@ void main(List<String> arguments) async {
       maze.add(
           Valve(item[0], int.parse(item[1]), item[2].split(", ").toList()));
     }
+    var usefulValves = maze._valves.values.where((v) => v.flow > 0).length;
     var pf = Pathfinder();
     var allPaths = pf.breadthFirstAll<State, String>((from, path) {
+      if (from.opened.length >= usefulValves) return [];
       List<StepTo<State, String>> nexts = [];
       var waysOut = maze.get(from.valveName).ways;
       var moves = waysOut.map((w) {
-        var step = StepTo<State, String>(State(w, from.opened.entries, 0), w);
+        var step = StepTo<State, String>(State(w, from.opened.entries), w);
         return step;
       });
       nexts.addAll(moves);
@@ -33,15 +35,15 @@ void main(List<String> arguments) async {
             State(
                 from.valveName,
                 from.opened.entries
-                    .followedBy([MapEntry(from.valveName, path.steps.length)]),
-                0),
+                    .followedBy([MapEntry(from.valveName, path.steps.length)])),
             "open");
         nexts.add(step);
       }
       return nexts;
     }, (path) {
+      logProgress(path);
       return path.steps.length > 30;
-    }, State("AA", {}, 0));
+    }, State("AA", {}));
     var value = allPaths.fold(0, (acc, path) {
       var value = valueForPath(path, maze);
       return max(value, acc);
@@ -52,6 +54,14 @@ void main(List<String> arguments) async {
   var allOK = await rig.testSnippet("sample", 1651);
   // allOK &= await rig.test("literal sample", 0);
   if (allOK) await rig.runPrint();
+}
+
+int evalCounter = 0;
+void logProgress(PathTo<State, String> path) {
+  evalCounter++;
+  if (evalCounter % 1000 == 0) {
+    print("Evaluated $evalCounter paths, last: ${path.steps.length} steps");
+  }
 }
 
 int valueForPath(PathTo<State, String> path, Maze maze) {
@@ -76,17 +86,15 @@ class Valve {
 class State {
   String valveName;
   Map<String, int> opened = {};
-  int thenWaited;
-  State(this.valveName, Iterable<MapEntry<String, int>> prevOpened,
-      this.thenWaited) {
+  State(this.valveName, Iterable<MapEntry<String, int>> prevOpened) {
     opened = Map.fromEntries(prevOpened);
   }
 
   String? _hash;
   String mapHash() {
     if (_hash == null) {
-      var vals = opened.values.toList();
-      vals.sort((p1, p2) => p1.compareTo(p2));
+      var vals = opened.keys.toList();
+      vals.sort((p1, p2) => opened[p1]!.compareTo(opened[p2]!));
       _hash = vals.join("-");
     }
     return _hash!;
@@ -96,9 +104,7 @@ class State {
   bool operator ==(Object other) {
     if (other is! State) return false;
 
-    return valveName == other.valveName &&
-        mapHash() == other.mapHash() &&
-        thenWaited == other.thenWaited;
+    return valveName == other.valveName && mapHash() == other.mapHash();
   }
 
   @override
@@ -107,7 +113,6 @@ class State {
     for (var v in opened.keys) {
       result ^= v.hashCode ^ opened[v].hashCode;
     }
-    result ^= thenWaited;
     return result;
   }
 }

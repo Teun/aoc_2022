@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:collection/collection.dart';
 
 abstract class Costed {
@@ -77,15 +79,13 @@ class Pathfinder {
       ExploreFunc2<TPos, TStep> explore,
       DoneFunc<TPos, TStep> done,
       TPos start) {
-    List<PathTo<TPos, TStep>> toExplore = [];
+    var toExplore = Queue<PathTo<TPos, TStep>>.from([]);
     Map<TPos, PathTo<TPos, TStep>> pathsTo = {};
-    toExplore = [
-      PathTo([StepTo(start, null, cost: 0.0)])
-    ];
+    toExplore.add(PathTo([StepTo(start, null, cost: 0.0)]));
     pathsTo = {};
     pathsTo[start] = toExplore.first;
     while (true) {
-      var exploringFrom = toExplore.removeAt(0);
+      var exploringFrom = toExplore.removeFirst();
       var nextLocations = explore(exploringFrom.to, exploringFrom);
       for (var next in nextLocations) {
         if (!pathsTo.containsKey(next.pos)) {
@@ -95,10 +95,6 @@ class Pathfinder {
           }
           pathsTo[next.pos] = newPath;
           toExplore.add(newPath);
-          if (pathsTo.length % 100 == 0) {
-            print(
-                "Evaluated ${pathsTo.length} paths, last: ${newPath.steps.length} steps");
-          }
         } else {}
       }
       if (toExplore.isEmpty) {

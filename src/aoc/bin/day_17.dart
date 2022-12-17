@@ -1,9 +1,9 @@
 import 'package:aoc/lineparser.dart';
 import 'package:aoc/rig.dart';
 
-void main(List<String> arguments) async \{
-  final rig = Rig({{day}}, (raw, \{extra = 1}) async \{
-    var items = parseToObjects(raw, RegExp(r''), (matches) \{
+void main(List<String> arguments) async {
+  final rig = Rig(17, (raw, {extra = 1}) async {
+    var items = parseToObjects(raw, RegExp(r''), (matches) {
       return 0;
     });
     return 0;
