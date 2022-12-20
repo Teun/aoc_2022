@@ -1,5 +1,4 @@
 import 'package:aoc/coord.dart';
-import 'package:aoc/lineparser.dart';
 import 'package:aoc/rig.dart';
 
 void main(List<String> arguments) async {
@@ -13,12 +12,14 @@ void main(List<String> arguments) async {
       [Coord(0, 0), Coord(0, -1), Coord(0, -2), Coord(0, -3)],
       [Coord(0, 0), Coord(0, -1), Coord(1, 0), Coord(1, -1)]
     ];
+    Map<String, List<int>> memo = {};
+    bool jumpMade = false;
     bool rockFalling = false;
     Coord currentRockPos = Coord(0, 0);
     int rockTypeIx = 0;
     int rocksFixed = 0;
     List<Coord> currentRock = [];
-    for (var i = 0; i < 100000; i++) {
+    for (var i = 0; true; i++) {
       // appear
       if (!rockFalling) {
         currentRockPos = Coord(2, space.bounds.topLeft.y - 4);
@@ -56,12 +57,58 @@ void main(List<String> arguments) async {
         rocksFixed++;
         rockFalling = false;
         //print(space.visualize((val) => val));
-        if (rocksFixed == 2022) return -space.bounds.topLeft.y;
+        if (rocksFixed % 100 == 0) print("$rocksFixed rocks fixed");
+        if (rocksFixed == 1000000000000) {
+          print(space.visualize((val) => val,
+              bnds: Rect(space.bounds.topLeft,
+                  Coord(7, space.bounds.topLeft.y + 20))));
+          return -space.bounds.topLeft.y;
+        }
+        var key = calculateKey(space, i % directions.length, rockTypeIx);
+        if (memo.containsKey(key)) {
+          if (!jumpMade) {
+            var oldCase = memo[key]!;
+            var di = i - oldCase[0];
+            var dh = space.bounds.topLeft.y - oldCase[1];
+            var dr = rocksFixed - oldCase[2];
+            var loopsNeeded = ((1000000000000 - rocksFixed) / dr).floor();
+            i += loopsNeeded * di;
+            rocksFixed += loopsNeeded * dr;
+            copyGrid(20, space.bounds.topLeft.y,
+                space.bounds.topLeft.y + loopsNeeded * dh, space);
+            jumpMade = true;
+          }
+        } else {
+          memo[key] = [i, space.bounds.topLeft.y, rocksFixed];
+        }
       }
     }
-    throw Exception();
   });
 
-  var allOK = await rig.testSnippet("sample", 3068);
+  var allOK = await rig.testSnippet("sample", 1514285714288);
   if (allOK) await rig.runPrint();
+}
+
+void copyGrid(int lines, int yFrom, int yTo, Space<String> space) {
+  var dy = yTo - yFrom;
+  for (var y = yFrom; y < yFrom + lines; y++) {
+    for (var x = 0; x < 7; x++) {
+      var found = space.at(Coord(x, y));
+      if (found == null) continue;
+      space.set(Coord(x, y + dy), found);
+    }
+  }
+  print(space.visualize((val) => val,
+      bnds: Rect(
+          space.bounds.topLeft, Coord(7, space.bounds.topLeft.y + lines))));
+}
+
+String calculateKey(Space<String> space, int i, int rockTypeIx) {
+  var result = "";
+  for (var x = 0; x < 20; x++) {
+    for (var y = space.bounds.topLeft.y; y < space.bounds.topLeft.y + 5; y++) {
+      result += space.at(Coord(x, y)) == null ? '.' : '#';
+    }
+  }
+  return "$i-$rockTypeIx-$result";
 }

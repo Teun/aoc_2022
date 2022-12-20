@@ -102,10 +102,11 @@ class Space<TVal> {
     }
   }
 
-  String visualize(String Function(TVal val) showAs) {
+  String visualize(String Function(TVal val) showAs, {Rect? bnds}) {
     var result = "";
-    for (var y = bounds.topLeft.y; y <= bounds.bottomRight.y; y++) {
-      for (var x = bounds.topLeft.x; x <= bounds.bottomRight.x; x++) {
+    var region = bnds ?? bounds;
+    for (var y = region.topLeft.y; y <= region.bottomRight.y; y++) {
+      for (var x = region.topLeft.x; x <= region.bottomRight.x; x++) {
         var val = at(Coord(x, y));
         if (val == null) {
           result += " ";

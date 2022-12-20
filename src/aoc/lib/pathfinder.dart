@@ -1,5 +1,7 @@
 import 'dart:collection';
+import 'dart:developer';
 
+import 'package:aoc/cpu.dart';
 import 'package:collection/collection.dart';
 
 abstract class Costed {
@@ -38,6 +40,12 @@ class PathTo<TPos, TStep> extends Comparable {
   @override
   int compareTo(other) {
     return cost.compareTo(other.cost);
+  }
+
+  @override
+  String toString() {
+    var stepsString = steps.map((e) => e.step.toString()).join(' -> ');
+    return "$stepsString\n$to";
   }
 }
 
@@ -95,7 +103,10 @@ class Pathfinder {
           }
           pathsTo[next.pos] = newPath;
           toExplore.add(newPath);
-        } else {}
+        } else {
+          // print(
+          //     "Path already available: \n${pathsTo[next.pos].toString()}\nis equal to ${exploringFrom.toString()}\n + step ${next.step}");
+        }
       }
       if (toExplore.isEmpty) {
         return pathsTo.values.toList();
