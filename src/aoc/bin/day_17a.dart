@@ -74,7 +74,7 @@ void main(List<String> arguments) async {
             var loopsNeeded = ((1000000000000 - rocksFixed) / dr).floor();
             i += loopsNeeded * di;
             rocksFixed += loopsNeeded * dr;
-            copyGrid(20, space.bounds.topLeft.y,
+            copyGrid(50, space.bounds.topLeft.y,
                 space.bounds.topLeft.y + loopsNeeded * dh, space);
             jumpMade = true;
           }
@@ -105,8 +105,8 @@ void copyGrid(int lines, int yFrom, int yTo, Space<String> space) {
 
 String calculateKey(Space<String> space, int i, int rockTypeIx) {
   var result = "";
-  for (var x = 0; x < 20; x++) {
-    for (var y = space.bounds.topLeft.y; y < space.bounds.topLeft.y + 5; y++) {
+  for (var x = 0; x < 7; x++) {
+    for (var y = space.bounds.topLeft.y; y < space.bounds.topLeft.y + 20; y++) {
       result += space.at(Coord(x, y)) == null ? '.' : '#';
     }
   }

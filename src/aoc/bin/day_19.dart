@@ -14,7 +14,12 @@ void main(List<String> arguments) async {
       var asNumbers = matches.map(int.parse);
       return Blueprint(asNumbers.toList());
     });
-    var qualities = items.map(getQualityLevelFor);
+    var qualities = items.map((it) {
+      memoHits = 0;
+      memoMisses = 0;
+      memo.clear();
+      return getQualityLevelFor(it, 24, Inventory(0, 0, 0, 0, 1, 0, 0, 0));
+    });
     return qualities.fold(0, (acc, v) => acc + v);
   });
 
@@ -40,10 +45,13 @@ class Blueprint {
         obsidianRobotClay = numbers[4],
         geodeRobotOre = numbers[5],
         geodeRobotObsidian = numbers[6];
+  @override
+  String toString() {
+    return "$oreRobotOre-$clayRobotOre-$obsidianRobotOre-$obsidianRobotClay-$geodeRobotOre-$geodeRobotObsidian";
+  }
 }
 
 class Inventory {
-  int time;
   int oreRobots;
   int ore;
   int clayRobots;
@@ -52,147 +60,111 @@ class Inventory {
   int obsidian;
   int geodeRobots;
   int geodes;
-  Inventory(this.time, this.ore, this.clay, this.obsidian, this.geodes,
-      this.oreRobots, this.clayRobots, this.obsidianRobots, this.geodeRobots);
-  Inventory.from(Inventory other, int waiting)
-      : time = other.time,
-        ore = other.ore,
+  Inventory(this.ore, this.clay, this.obsidian, this.geodes, this.oreRobots,
+      this.clayRobots, this.obsidianRobots, this.geodeRobots);
+  Inventory.from(Inventory other)
+      : ore = other.ore,
         clay = other.clay,
         obsidian = other.obsidian,
         geodes = other.geodes,
         oreRobots = other.oreRobots,
         clayRobots = other.clayRobots,
         obsidianRobots = other.obsidianRobots,
-        geodeRobots = other.geodeRobots {
-    wait(waiting);
-  }
-  void wait(int ticks) {
-    time += ticks;
-    ore += ticks * oreRobots;
-    clay += ticks * clayRobots;
-    obsidian += ticks * obsidianRobots;
-    geodes += ticks * geodeRobots;
+        geodeRobots = other.geodeRobots;
+
+  void collect() {
+    ore += oreRobots;
+    clay += clayRobots;
+    obsidian += obsidianRobots;
+    geodes += geodeRobots;
   }
 
   @override
-  bool operator ==(Object other) {
-    if (other is! Inventory) return false;
-    return time == other.time &&
-        ore == other.ore &&
-        clay == other.clay &&
-        obsidian == other.obsidian &&
-        geodes == other.geodes &&
-        oreRobots == other.oreRobots &&
-        clayRobots == other.clayRobots &&
-        obsidianRobots == other.obsidianRobots &&
-        geodeRobots == other.geodeRobots;
+  String toString() {
+    return "$ore-$clay-$obsidian-$geodes=$oreRobots-$clayRobots-$obsidianRobots-$geodeRobots";
   }
-
-  @override
-  int get hashCode =>
-      time.hashCode ^
-      ore.hashCode ^
-      clay.hashCode ^
-      obsidian.hashCode ^
-      geodes.hashCode;
 }
 
-enum Robot { Ore, Clay, Obsidian, Geode, None }
+enum Robot { Ore, Clay, Obsidian, Geode }
 
-int counter = 0;
-int getQualityLevelFor(Blueprint bp) {
-  var pf = Pathfinder();
-  var bestScore = 0;
-  var paths = pf.breadthFirstAll<Inventory, Robot>((from, path) {
-    counter++;
-    if (counter % 1000 == 0) {
-      var steps = path.steps.map((e) => e.step).toList();
-      print(
-          "Explored $counter paths. This path at ${from.time} s. in ${steps.length} steps");
+int memoHits = 0;
+int memoMisses = 0;
+Map<String, int> memo = {};
+int getQualityLevelFor(Blueprint bp, int timeLeft, Inventory inv) {
+  String key = "";
+  if (timeLeft >= 5) {
+    key = "$bp:$inv:$timeLeft";
+    if (memo.containsKey(key)) {
+      memoHits++;
+      return memo[key]!;
     }
-    if (from.time >= 24) return [];
-    List<StepTo<Inventory, Robot>> result = [];
-    var bestConceivableScore =
-        estimatedMaxTotalScore(24, from, bp.geodeRobotObsidian);
-    if (bestScore > 1 && bestScore >= bestConceivableScore) {
-      // we already have a solution that this path cannot exceed
-      return result;
-    }
-    var tn = waitTimeNeeded(from.ore, from.oreRobots, bp.oreRobotOre);
-    if (from.time + tn < 24) {
-      var newInv = Inventory.from(from, tn + 1);
-      newInv.oreRobots++;
-      newInv.ore -= bp.oreRobotOre;
-      result.add(StepTo(newInv, Robot.Ore));
-    }
-    tn = waitTimeNeeded(from.ore, from.oreRobots, bp.clayRobotOre);
-    if (from.time + tn < 24) {
-      var newInv = Inventory.from(from, tn + 1);
-      newInv.clayRobots++;
-      newInv.ore -= bp.clayRobotOre;
-      result.add(StepTo(newInv, Robot.Clay));
-    }
-    tn = max(waitTimeNeeded(from.ore, from.oreRobots, bp.obsidianRobotOre),
-        waitTimeNeeded(from.clay, from.clayRobots, bp.obsidianRobotClay));
-    if (from.time + tn < 24) {
-      var newInv = Inventory.from(from, tn + 1);
-      newInv.obsidianRobots++;
-      newInv.ore -= bp.obsidianRobotOre;
-      newInv.clay -= bp.obsidianRobotClay;
-      if (newInv.clay < 0) {
-        print("");
-      }
-      result.add(StepTo(newInv, Robot.Obsidian));
-    }
-    tn = max(
-        waitTimeNeeded(from.ore, from.oreRobots, bp.geodeRobotOre),
-        waitTimeNeeded(
-            from.obsidian, from.obsidianRobots, bp.geodeRobotObsidian));
-    if (from.time + tn < 24) {
-      var newInv = Inventory.from(from, tn + 1);
-      newInv.ore -= bp.geodeRobotOre;
-      newInv.obsidian -= bp.geodeRobotObsidian;
-      newInv.geodeRobots++;
-      result.add(StepTo(newInv, Robot.Geode));
-    }
-    if (result.isEmpty && from.time < 24) {
-      // wait it out
-      result.add(StepTo(Inventory.from(from, 24 - from.time), Robot.None));
-    }
-    return result;
-  }, (path) {
-    if (path.to.geodes > bestScore) {
-      bestScore = path.to.geodes;
-    }
-    return false;
-  }, Inventory(0, 0, 0, 0, 0, 1, 0, 0, 0));
-  paths.sort((a, b) => b.to.geodes.compareTo(a.to.geodes));
-  var bestPath = paths.first;
-  var steps = bestPath.steps.toList();
-  print("${bp.ID}: $bestPath");
-  var res = bestPath.to.geodes * bp.ID;
-  return bestPath.to.geodes * bp.ID;
-}
-
-int estimatedMaxTotalScore(
-    int totalTime, Inventory from, int geodeRobotObsidian) {
-  var timeLeft = totalTime - from.time;
-  var score = from.geodes;
-  score += timeLeft * from.geodeRobots;
-  var obsidianNeededForNextRobot = geodeRobotObsidian - from.obsidian;
-  if (from.obsidianRobots == 0) {
-    score = (timeLeft - 10).clamp(0, 100); // ???
-  } else {
-    var turnsAtCurrentRate =
-        (obsidianNeededForNextRobot / from.obsidianRobots).ceil();
-    score += (timeLeft - turnsAtCurrentRate + 3)
-        .clamp(0, 100); // suppose we get a new geodeRobot next round
   }
-  return score;
+  memoMisses++;
+  if (memoMisses % 1000000 == 0) {
+    print(
+        "Execution $memoMisses: bp: ${bp.ID}, size of memo: ${memo.length}, hits: $memoHits");
+  }
+  if (timeLeft == 0) return inv.geodes;
+  timeLeft--;
+  var inventories = nextStepInventories(inv, bp);
+  var bestValue = inventories.fold(
+      0, (prev, v) => max(prev, getQualityLevelFor(bp, timeLeft, v)));
+  if (timeLeft + 1 >= 5) {
+    memo[key] = bestValue;
+  }
+  return bestValue;
 }
 
-int waitTimeNeeded(int have, int producers, int needed) {
-  var fullTime = ((needed - have) / producers);
-  if (fullTime > 100) return 100;
-  return fullTime.ceil().clamp(0, 100);
+List<Inventory> nextStepInventories(Inventory inv, Blueprint bp) {
+  List<Inventory> found = [];
+  Inventory newInv = Inventory.from(inv);
+  newInv.collect();
+  found.add(newInv);
+  if (canBuild(inv, Robot.Ore, bp)) {
+    newInv = Inventory.from(inv);
+    newInv.collect();
+    newInv.oreRobots++;
+    newInv.ore -= bp.oreRobotOre;
+    found.add(newInv);
+  }
+  if (canBuild(inv, Robot.Clay, bp)) {
+    newInv = Inventory.from(inv);
+    newInv.collect();
+    newInv.clayRobots++;
+    newInv.ore -= bp.clayRobotOre;
+    found.add(newInv);
+  }
+  if (canBuild(inv, Robot.Obsidian, bp)) {
+    newInv = Inventory.from(inv);
+    newInv.collect();
+    newInv.obsidianRobots++;
+    newInv.ore -= bp.obsidianRobotOre;
+    newInv.clay -= bp.obsidianRobotClay;
+    found.add(newInv);
+  }
+  if (canBuild(inv, Robot.Geode, bp)) {
+    newInv = Inventory.from(inv);
+    newInv.collect();
+    newInv.geodeRobots++;
+    newInv.ore -= bp.geodeRobotOre;
+    newInv.obsidian -= bp.geodeRobotObsidian;
+    found.add(newInv);
+  }
+  return found.toList();
+}
+
+bool canBuild(Inventory inv, Robot rtype, Blueprint bp) {
+  if (rtype == Robot.Ore) {
+    return inv.ore >= bp.oreRobotOre;
+  }
+  if (rtype == Robot.Clay) {
+    return inv.ore >= bp.clayRobotOre;
+  }
+  if (rtype == Robot.Obsidian) {
+    return inv.ore >= bp.obsidianRobotOre && inv.clay >= bp.obsidianRobotClay;
+  }
+  if (rtype == Robot.Geode) {
+    return inv.ore >= bp.geodeRobotOre && inv.obsidian >= bp.geodeRobotObsidian;
+  }
+  return false;
 }
