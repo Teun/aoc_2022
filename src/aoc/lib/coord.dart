@@ -5,6 +5,8 @@ class Coord {
   final int y;
   Coord(this.x, this.y);
   @override
+  String toString() => "($x,$y)";
+  @override
   bool operator ==(Object other) {
     if (other is! Coord) return false;
     return x == other.x && y == other.y;
@@ -46,7 +48,21 @@ class Rect {
   }
 }
 
-enum Direction { north, south, east, west }
+enum Direction { north, east, south, west }
+
+extension ChangeDirection on Direction {
+  Direction toLeft() {
+    return Direction.values[(index + 4 - 1) % 4];
+  }
+
+  Direction toRight() {
+    return Direction.values[(index + 1) % 4];
+  }
+
+  Direction get reverse {
+    return Direction.values[(index + 2) % 4];
+  }
+}
 
 extension CombineDirection on Coord {
   Coord toDirection(Direction dir) {
@@ -88,7 +104,7 @@ class Space<TVal> {
         .map((l) => l.split(''))
         .toList();
     for (var y = 0; y < chars.length; y++) {
-      for (var x = 0; x < chars[0].length; x++) {
+      for (var x = 0; x < chars[y].length; x++) {
         var val = valSelect(chars[y][x], Coord(x, y));
         if (val != null) _places[Coord(x, y)] = val;
       }

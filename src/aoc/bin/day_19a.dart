@@ -14,11 +14,11 @@ void main(List<String> arguments) async {
       var asNumbers = matches.map(int.parse);
       return Blueprint(asNumbers.toList());
     });
-    var qualities = items.map(getQualityLevelFor);
-    return qualities.fold(0, (acc, v) => acc + v);
+    var geodeCounts = items.take(3).map(getMaxGeodes);
+    return geodeCounts.fold(1, (acc, v) => acc * v);
   });
 
-  var allOK = await rig.testSnippet("sample", 33);
+  var allOK = await rig.testSnippet("sample", 56 * 62);
   //allOK &= await rig.test("literal sample", 0);
   if (allOK) await rig.runPrint();
 }
@@ -105,7 +105,7 @@ class Inventory {
 enum Robot { Ore, Clay, Obsidian, Geode, None }
 
 int counter = 0;
-int getQualityLevelFor(Blueprint bp) {
+int getMaxGeodes(Blueprint bp) {
   var pf = Pathfinder();
   var bestScore = 0;
   var paths = pf.breadthFirstAll<Inventory, Robot>((from, path) {
@@ -115,23 +115,23 @@ int getQualityLevelFor(Blueprint bp) {
       print(
           "Explored $counter paths. This path at ${from.time} s. in ${steps.length} steps");
     }
-    if (from.time >= 24) return [];
+    if (from.time >= 32) return [];
     List<StepTo<Inventory, Robot>> result = [];
     var bestConceivableScore =
-        estimatedMaxTotalScore(24, from, bp.geodeRobotObsidian);
+        estimatedMaxTotalScore(32, from, bp.geodeRobotObsidian);
     if (bestScore > 1 && bestScore >= bestConceivableScore) {
       // we already have a solution that this path cannot exceed
       return result;
     }
     var tn = waitTimeNeeded(from.ore, from.oreRobots, bp.oreRobotOre);
-    if (from.time + tn < 24 && from.oreRobots < bp.maxOre) {
+    if (from.time + tn < 32 && from.oreRobots < bp.maxOre) {
       var newInv = Inventory.from(from, tn + 1);
       newInv.oreRobots++;
       newInv.ore -= bp.oreRobotOre;
       result.add(StepTo(newInv, Robot.Ore));
     }
     tn = waitTimeNeeded(from.ore, from.oreRobots, bp.clayRobotOre);
-    if (from.time + tn < 24) {
+    if (from.time + tn < 32) {
       var newInv = Inventory.from(from, tn + 1);
       newInv.clayRobots++;
       newInv.ore -= bp.clayRobotOre;
@@ -139,7 +139,7 @@ int getQualityLevelFor(Blueprint bp) {
     }
     tn = max(waitTimeNeeded(from.ore, from.oreRobots, bp.obsidianRobotOre),
         waitTimeNeeded(from.clay, from.clayRobots, bp.obsidianRobotClay));
-    if (from.time + tn < 24) {
+    if (from.time + tn < 32) {
       var newInv = Inventory.from(from, tn + 1);
       newInv.obsidianRobots++;
       newInv.ore -= bp.obsidianRobotOre;
@@ -153,16 +153,16 @@ int getQualityLevelFor(Blueprint bp) {
         waitTimeNeeded(from.ore, from.oreRobots, bp.geodeRobotOre),
         waitTimeNeeded(
             from.obsidian, from.obsidianRobots, bp.geodeRobotObsidian));
-    if (from.time + tn < 24) {
+    if (from.time + tn < 32) {
       var newInv = Inventory.from(from, tn + 1);
       newInv.ore -= bp.geodeRobotOre;
       newInv.obsidian -= bp.geodeRobotObsidian;
       newInv.geodeRobots++;
       result.add(StepTo(newInv, Robot.Geode));
     }
-    if (result.isEmpty && from.time < 24) {
+    if (result.isEmpty && from.time < 32) {
       // wait it out
-      result.add(StepTo(Inventory.from(from, 24 - from.time), Robot.None));
+      result.add(StepTo(Inventory.from(from, 32 - from.time), Robot.None));
     }
     return result;
   }, (path) {
@@ -175,8 +175,7 @@ int getQualityLevelFor(Blueprint bp) {
   var bestPath = paths.first;
   var steps = bestPath.steps.toList();
   print("${bp.ID}: $bestPath");
-  var res = bestPath.to.geodes * bp.ID;
-  return bestPath.to.geodes * bp.ID;
+  return bestPath.to.geodes;
 }
 
 int estimatedMaxTotalScore(
@@ -184,11 +183,11 @@ int estimatedMaxTotalScore(
   var timeLeft = totalTime - from.time;
   var score = from.geodes;
   score += timeLeft * from.geodeRobots;
-  score += (timeLeft - 1).clamp(0, 24);
-  score += (timeLeft - 2).clamp(0, 24);
-  score += (timeLeft - 3).clamp(0, 24);
-  score += (timeLeft - 4).clamp(0, 24);
-  score += (timeLeft - 5).clamp(0, 24);
+  if (from.obsidianRobots > 0) {
+    score += (timeLeft -
+        ((geodeRobotObsidian - from.obsidian) ~/ from.obsidianRobots));
+  }
+  score += (timeLeft - 10).clamp(0, 20);
   return score;
 }
 
