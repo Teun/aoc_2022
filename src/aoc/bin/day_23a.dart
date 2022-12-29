@@ -8,17 +8,20 @@ void main(List<String> arguments) async {
       return null;
     });
     var currGen = gen0;
-    for (var i = 0; i < 10; i++) {
+    var lastState = currGen.visualize((val) => "#");
+    for (var i = 0; i < 1000; i++) {
       currGen = getNextGen(currGen, i);
-      print("After round ${i + 1}:");
-      print(currGen.visualize((val) => "#"));
+      var newState = currGen.visualize((val) => "#");
+      if (newState == lastState) return i + 1;
+      print("After round ${i + 1}: ${newState.length}");
+      //print(newState);
+      lastState = newState;
     }
-    var bounds = currGen.bounds;
-    return (bounds.totalSpots - currGen.all.length);
+    throw Exception("not finished");
   });
 
-  var allOK = await rig.testSnippet("mini", 25);
-  allOK &= await rig.testSnippet("sample", 110);
+  var allOK = true;
+  allOK &= await rig.testSnippet("sample", 20);
   //allOK &= await rig.test("literal sample", 0);
   if (allOK) await rig.runPrint();
 }

@@ -116,8 +116,10 @@ class Pathfinder {
 
   PathTo<TPos, TStep> findShortest<TPos, TStep>(
       ExploreFunc<TPos, TStep> explore, TargetFunc<TPos> target, TPos start,
-      {double Function(TPos from)? minimalDistanceRemaining}) {
+      {double Function(TPos from)? minimalDistanceRemaining,
+      void Function(int statesSeen, PathTo<TPos, TStep> best)? progress}) {
     var heuristicFunc = minimalDistanceRemaining ?? (p) => 0;
+    var progressLogger = progress ?? (s, b) {};
     var toExplore = PriorityQueue<PathTo<TPos, TStep>>(((p0, p1) =>
         (p0.cost + heuristicFunc(p0.to))
             .compareTo(p1.cost + heuristicFunc(p1.to))));
@@ -128,6 +130,7 @@ class Pathfinder {
     pathsTo[start] = toExplore.first;
     do {
       var exploringFrom = toExplore.removeFirst();
+      progressLogger(pathsTo.length, exploringFrom);
       if (bestPath != null &&
           exploringFrom.cost + heuristicFunc(exploringFrom.to) >
               bestPath.cost) {

@@ -4,6 +4,18 @@ class Coord {
   final int x;
   final int y;
   Coord(this.x, this.y);
+
+  Iterable<Coord> get neighboursIncludingDiag sync* {
+    yield toDirection(Direction.north);
+    yield toDirection(Direction.north).toDirection((Direction.east));
+    yield toDirection(Direction.east);
+    yield toDirection(Direction.east).toDirection((Direction.south));
+    yield toDirection(Direction.south);
+    yield toDirection(Direction.south).toDirection((Direction.west));
+    yield toDirection(Direction.west);
+    yield toDirection(Direction.west).toDirection((Direction.north));
+  }
+
   @override
   String toString() => "($x,$y)";
   @override
@@ -23,6 +35,9 @@ class Rect {
   Coord topLeft = Coord(0, 0);
   Coord bottomRight = Coord(0, 0);
   bool uninitialized = true;
+
+  get totalSpots =>
+      (bottomRight.x - topLeft.x + 1) * (bottomRight.y - topLeft.y + 1);
 
   void expandToContain(Coord place) {
     if (uninitialized) {
@@ -45,6 +60,12 @@ class Rect {
   Rect(Coord topLeft, Coord bottomRight) {
     expandToContain(topLeft);
     expandToContain(bottomRight);
+  }
+
+  bool contains(Coord pos) {
+    if (pos.x < topLeft.x || pos.x > bottomRight.x) return false;
+    if (pos.y < topLeft.y || pos.y > bottomRight.y) return false;
+    return true;
   }
 }
 
