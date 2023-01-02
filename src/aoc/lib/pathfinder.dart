@@ -2,6 +2,7 @@ import 'dart:collection';
 import 'dart:developer';
 
 import 'package:aoc/cpu.dart';
+import 'package:aoc/thenby.dart';
 import 'package:collection/collection.dart';
 
 abstract class Costed {
@@ -53,6 +54,8 @@ typedef ExploreFunc<TPos, TStep> = List<StepTo<TPos, TStep>> Function(
     TPos from);
 typedef ExploreFunc2<TPos, TStep> = List<StepTo<TPos, TStep>> Function(
     TPos from, PathTo<TPos, TStep> path);
+typedef ExploreFunc3<TPos, TStep> = List<StepTo<TPos, TStep>> Function(
+    TPos from, PathTo<TPos, TStep> path, int round);
 typedef TargetFunc<TPos> = bool Function(TPos pos);
 typedef DoneFunc<TPos, TStep> = bool Function(PathTo<TPos, TStep> path);
 
@@ -104,14 +107,42 @@ class Pathfinder {
           pathsTo[next.pos] = newPath;
           toExplore.add(newPath);
         } else {
-          // print(
-          //     "Path already available: \n${pathsTo[next.pos].toString()}\nis equal to ${exploringFrom.toString()}\n + step ${next.step}");
+          print(
+              "Path already available: \n${pathsTo[next.pos].toString()}\nis equal to ${exploringFrom.toString()}\n + step ${next.step}");
         }
       }
       if (toExplore.isEmpty) {
         return pathsTo.values.toList();
       }
     }
+  }
+
+  List<PathTo<TPos, TStep>> strictRounds<TPos, TStep>(
+      ExploreFunc3<TPos, TStep> explore, TPos start, int maxRounds,
+      {int? maxGenerationSize}) {
+    List<PathTo<TPos, TStep>> currGen = [
+      PathTo([StepTo(start, null)])
+    ];
+    var round = 0;
+    while (round < maxRounds) {
+      round++;
+      Map<TPos, PathTo<TPos, TStep>> nextGen = {};
+      for (var path in currGen) {
+        var nextLocations = explore(path.to, path, round);
+        for (var newLoc in nextLocations) {
+          if (!nextGen.containsKey(newLoc.pos)) {
+            nextGen[newLoc.pos] = PathTo(path.steps.followedBy([newLoc]));
+          }
+        }
+      }
+      currGen = nextGen.values.toList();
+      if (maxGenerationSize != null && currGen.length > maxGenerationSize) {
+        currGen.sort(
+            firstBy((PathTo<TPos, TStep> p) => p.value, dir: Direction.desc));
+        currGen = currGen.sublist(0, maxGenerationSize);
+      }
+    }
+    return currGen;
   }
 
   PathTo<TPos, TStep> findShortest<TPos, TStep>(
